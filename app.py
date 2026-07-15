@@ -889,12 +889,12 @@ elif selected == "About":
         st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
         st.plotly_chart(
             performance_chart(
-                "Attrition Prediction F1 Score",
+                "Attrition Prediction Accuracy",
                 ["Random Forest", "Logistic Regression", "SVM", "KNN"],
-                [0.35, 0.38, 0.43, 0.36],
+                [0.85, 0.72, 0.79, 0.77],
                 ["#63d9c9", "#7c83fd", "#ffd166", "#f87171"],
-                "F1-Score (Class 1)",
-                (0.0, 0.5),
+                "Accuracy",
+                (0.0, 1.0),
             ),
             use_container_width=True,
         )
