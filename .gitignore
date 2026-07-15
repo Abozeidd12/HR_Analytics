@@ -5,5 +5,3 @@ __pycache__/
 .vscode/
 .env
 .ipynb_checkpoints/
-models/
-*.pkl
