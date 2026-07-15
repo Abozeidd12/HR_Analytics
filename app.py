@@ -45,9 +45,9 @@ DEPT_DUMMY_COLS = [
 EDUCATION_MAP = {"Master's & above": 3, "Bachelor's": 2, "Below Secondary": 1}
 CHANNEL_MAP = {"sourcing": 3, "referred": 2, "other": 1}
 
-# NOTE: verify this matches the exact numeric codes your salary notebook's
-# encoder used for "Education Level" (e.g. LabelEncoder.classes_ order).
-# This is a reasonable default (ordinal, low -> high) -- edit if different.
+# The raw "Education Level" column in the salary dataset is already numeric
+# (0-3), so there's no encoder to match -- these labels are just friendly
+# names for the UI. Edit them if 0-3 mean something different in your data.
 SALARY_EDUCATION_MAP = {
     "High School": 0,
     "Bachelor's": 1,
@@ -696,7 +696,7 @@ elif selected == "Salary Prediction":
         years_of_experience_s = st.number_input(
             "💼 Years of Experience", min_value=0, max_value=60, value=5, step=1, key="sal_exp"
         )
-        senior_s = st.selectbox("⭐ Senior", [0, 1], index=0, key="sal_senior")
+        senior_s_label = st.selectbox("⭐ Senior", ["No", "Yes"], index=0, key="sal_senior")
     with colB:
         gender_s = st.selectbox("🚻 Gender", SALARY_GENDERS, index=0, key="sal_gender")
         country_s = st.selectbox("🌍 Country", SALARY_COUNTRIES, index=4 if "USA" in SALARY_COUNTRIES else 0, key="sal_country")
@@ -710,7 +710,7 @@ elif selected == "Salary Prediction":
             "Age": age_s,
             "Education Level": SALARY_EDUCATION_MAP[education_s_label],
             "Years of Experience": years_of_experience_s,
-            "Senior": senior_s,
+            "Senior": 1 if senior_s_label == "Yes" else 0,
         }
         row.update(one_hot_selected_value(gender_s, SALARY_GENDERS, "Gender"))
         row.update(one_hot_selected_value(country_s, SALARY_COUNTRIES, "Country"))
@@ -889,12 +889,12 @@ elif selected == "About":
         st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
         st.plotly_chart(
             performance_chart(
-                "Attrition Prediction Accuracy",
+                "Attrition Prediction F1 Score",
                 ["Random Forest", "Logistic Regression", "SVM", "KNN"],
-                [0.850340, 0.721088, 0.789116, 0.768707],
+                [0.35, 0.38, 0.43, 0.36],
                 ["#63d9c9", "#7c83fd", "#ffd166", "#f87171"],
-                "Accuracy",
-                (0.0, 1.0),
+                "F1-Score (Class 1)",
+                (0.0, 0.5),
             ),
             use_container_width=True,
         )
