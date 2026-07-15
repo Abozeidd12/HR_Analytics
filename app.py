@@ -45,6 +45,16 @@ DEPT_DUMMY_COLS = [
 EDUCATION_MAP = {"Master's & above": 3, "Bachelor's": 2, "Below Secondary": 1}
 CHANNEL_MAP = {"sourcing": 3, "referred": 2, "other": 1}
 
+# NOTE: verify this matches the exact numeric codes your salary notebook's
+# encoder used for "Education Level" (e.g. LabelEncoder.classes_ order).
+# This is a reasonable default (ordinal, low -> high) -- edit if different.
+SALARY_EDUCATION_MAP = {
+    "High School": 0,
+    "Bachelor's": 1,
+    "Master's": 2,
+    "PhD": 3,
+}
+
 
 @st.cache_data
 def load_salary_metadata():
@@ -680,7 +690,9 @@ elif selected == "Salary Prediction":
     colA, colB = st.columns(2)
     with colA:
         age_s = st.number_input("🎂 Age", min_value=18, max_value=100, value=30, step=1, key="sal_age")
-        education_s = st.selectbox("🎓 Education Level", [0, 1, 2, 3], index=2, key="sal_edu")
+        education_s_label = st.selectbox(
+            "🎓 Education Level", list(SALARY_EDUCATION_MAP.keys()), index=1, key="sal_edu"
+        )
         years_of_experience_s = st.number_input(
             "💼 Years of Experience", min_value=0, max_value=60, value=5, step=1, key="sal_exp"
         )
@@ -696,7 +708,7 @@ elif selected == "Salary Prediction":
     if predict_clicked_s:
         row = {
             "Age": age_s,
-            "Education Level": education_s,
+            "Education Level": SALARY_EDUCATION_MAP[education_s_label],
             "Years of Experience": years_of_experience_s,
             "Senior": senior_s,
         }
@@ -744,11 +756,14 @@ elif selected == "Attrition Prediction":
     colA, colB = st.columns(2)
     with colA:
         age_a = st.number_input("🎂 Age", min_value=18, max_value=100, value=30, step=1, key="att_age")
-        business_travel_code = st.selectbox(
+        business_travel_str = st.selectbox(
             "✈️ Business Travel",
-            [0, 1, 2],
-            index=2,
-            format_func=lambda value: ATTRITION_BUSINESS_TRAVEL_LABELS[value],
+            ATTRITION_BUSINESS_TRAVEL_OPTIONS,
+            index=(
+                ATTRITION_BUSINESS_TRAVEL_OPTIONS.index("Travel_Rarely")
+                if "Travel_Rarely" in ATTRITION_BUSINESS_TRAVEL_OPTIONS
+                else 0
+            ),
             key="att_travel",
         )
         total_working_years = st.number_input(
@@ -758,11 +773,10 @@ elif selected == "Attrition Prediction":
             "💵 Monthly Income", min_value=0, max_value=200000, value=5000, step=100, key="att_income"
         )
     with colB:
-        overtime_code = st.selectbox(
+        overtime_str = st.selectbox(
             "⏱️ OverTime",
-            [0, 1],
+            ATTRITION_OVERTIME_OPTIONS,
             index=0,
-            format_func=lambda value: ATTRITION_OVERTIME_LABELS[value],
             key="att_overtime",
         )
         stock_option_level = st.selectbox("📈 Stock Option Level", [0, 1, 2, 3], index=0, key="att_stock")
@@ -779,8 +793,8 @@ elif selected == "Attrition Prediction":
     if predict_clicked_a:
         row = {
             "Age": age_a,
-            "OverTime": overtime_code,
-            "BusinessTravel": business_travel_code,
+            "OverTime": overtime_str,
+            "BusinessTravel": business_travel_str,
             "TotalWorkingYears": total_working_years,
             "MonthlyIncome": monthly_income,
             "StockOptionLevel": stock_option_level,
@@ -875,12 +889,12 @@ elif selected == "About":
         st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
         st.plotly_chart(
             performance_chart(
-                "Attrition Prediction F1 Score",
+                "Attrition Prediction Accuracy",
                 ["Random Forest", "Logistic Regression", "SVM", "KNN"],
-                [0.35, 0.38, 0.43, 0.36],
+                [0.850340, 0.721088, 0.789116, 0.768707],
                 ["#63d9c9", "#7c83fd", "#ffd166", "#f87171"],
-                "F1-Score (Class 1)",
-                (0.0, 0.5),
+                "Accuracy",
+                (0.0, 1.0),
             ),
             use_container_width=True,
         )
